@@ -1,0 +1,30 @@
+# Data Handling
+pandas
+numpy
+
+# Visualization, Analysis and report
+matplotlib
+seaborn
+
+# Machine Learning
+scikit-learn
+
+# Deep Learning
+torch
+torchvision
+torchaudio
+
+# Saving and Loading Models
+joblib
+
+# Metrics and explainability
+scikit-learn-intelex
+shap
+
+# ML App Prototyping
+streamlit
+
+# Full-Stack Backend
+fastapi
+uvicorn
+pydantic

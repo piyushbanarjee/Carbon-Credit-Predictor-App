@@ -1,5 +1,5 @@
 import pandas as pd
-df = pd.read_csv("originalDataset.csv")
+df = pd.read_csv("RawData.csv")
 
 # Creating new feature
 df["Emission_Intensity"] = (
@@ -16,4 +16,4 @@ df[df.select_dtypes(include="bool").columns] = (
     df.select_dtypes(include="bool").astype(int)
 )
 
-df.to_csv("carbon_trading_dataset_features.csv", index=False)
+df.to_csv("Features.csv", index=False)

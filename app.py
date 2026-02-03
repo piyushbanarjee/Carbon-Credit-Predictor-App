@@ -237,8 +237,11 @@ if st.button("Predict All Models"):
 
     st.subheader("Predictions")
     st.success(f"Predicted Carbon Emission: {predicted_emission:.2f} tCO2")
+    st.caption("Total CO2 emissions produced based on energy demand and operational parameters")
     st.info(f"Emission Category: {emission_category(predicted_emission)}")
-    st.success(f"Predicted Carbon Price: {predicted_carbon_price:.2f} USD per t")
+    st.caption("Emission level classification for compliance assessment")
+    st.success(f"Predicted Carbon Price: {np.absolute(predicted_carbon_price):.2f} USD per t")
+    st.caption("Market price per ton of carbon credits based on current conditions")
 
     if rf_buysell is not None:
         net_position = emission_allowance - predicted_emission
@@ -259,7 +262,9 @@ if st.button("Predict All Models"):
             ]
         )
         buysell_pred = rf_buysell.predict(buysell_input)[0]
-        st.info(f"Transaction Type (class): {buysell_pred}")
+        transaction_action = "Buy" if buysell_pred == 0 else "Sell"
+        st.info(f"Transaction Type: {transaction_action}")
+        st.caption("Recommended trading action - whether to buy or sell carbon credits")
     else:
         st.warning("Buy/Sell model not found.")
 
@@ -278,6 +283,7 @@ if st.button("Predict All Models"):
         )
         compliance_pred = rf_compliance.predict(compliance_input)[0]
         st.info(f"Compliance Cost (USD): {compliance_pred:.2f}")
+        st.caption("Total cost to meet regulatory emission compliance requirements")
     else:
         st.warning("Compliance Cost model not found.")
 
@@ -297,6 +303,7 @@ if st.button("Predict All Models"):
         )
         cost_savings_pred = rf_cost_savings.predict(cost_savings_input)[0]
         st.info(f"Carbon Cost Savings (USD): {cost_savings_pred:.2f}")
+        st.caption("Potential savings from optimization strategies and efficient operations")
     else:
         st.warning("Cost Savings model not found.")
 
@@ -322,5 +329,6 @@ if st.button("Predict All Models"):
         st.info(
             f"Optimization Scenario (predicted): {optimization_labels.get(optimization_pred, optimization_pred)}"
         )
+        st.caption("Market condition category affecting operational and pricing strategies")
     else:
         st.warning("Optimization Scenario model not found.")

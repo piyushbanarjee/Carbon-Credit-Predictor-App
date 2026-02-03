@@ -9,31 +9,18 @@ import pandas as pd
 import joblib
 
 
-class MLP(nn.Module):
-    """
-    Multi-Layer Perceptron for regression tasks.
-    Optimized architecture with batch normalization and dropout for better generalization.
-    """
-    def __init__(self, input_dim, hidden_dims, output_dim, dropout_rate=0.3):
-        super().__init__()
-        layers = []
-        
-        # Build hidden layers
-        prev_dim = input_dim
-        for hidden_dim in hidden_dims:
-            layers.append(nn.Linear(prev_dim, hidden_dim))
-            layers.append(nn.BatchNorm1d(hidden_dim))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(dropout_rate))
-            prev_dim = hidden_dim
-        
-        # Output layer
-        layers.append(nn.Linear(prev_dim, output_dim))
-        
-        self.model = nn.Sequential(*layers)
-
-    def forward(self, x):
-        return self.model(x)
+def build_mlp(input_dim, hidden_dims, output_dim, dropout_rate=0.3):
+    """Build MLP using nn.Sequential for easy pickling."""
+    layers = []
+    prev_dim = input_dim
+    for hidden_dim in hidden_dims:
+        layers.append(nn.Linear(prev_dim, hidden_dim))
+        layers.append(nn.BatchNorm1d(hidden_dim))
+        layers.append(nn.ReLU())
+        layers.append(nn.Dropout(dropout_rate))
+        prev_dim = hidden_dim
+    layers.append(nn.Linear(prev_dim, output_dim))
+    return nn.Sequential(*layers)
 
 
 def main():
@@ -81,7 +68,7 @@ def main():
     output_features = 1
     
     # Initialize model
-    model = MLP(
+    model = build_mlp(
         input_dim=input_features,
         hidden_dims=hidden_layers,
         output_dim=output_features,

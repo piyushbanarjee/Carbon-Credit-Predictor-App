@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import joblib
-import torch
+
 
 st.set_page_config(page_title="Carbon Emission Prediction App", layout="centered")
 st.title("Carbon Emission Prediction")
@@ -62,14 +62,9 @@ if st.button("Predict Carbon Emission"):
     # Scale the input
     input_scaled = scaler.transform(input_data)
     
-    # Convert to tensor
-    input_tensor = torch.tensor(input_scaled, dtype=torch.float32)
-    
     # Make prediction
-    model.eval()
-    with torch.no_grad():
-        prediction = model(input_tensor)
-        predicted_emission = prediction.item()
+    prediction = model.predict(input_scaled)
+    predicted_emission = prediction[0]
     
     st.success(f"Predicted Carbon Emission: {predicted_emission:.2f} tCO2")
     category = emission_category(predicted_emission)

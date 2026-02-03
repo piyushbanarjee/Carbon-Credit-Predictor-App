@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 df = pd.read_csv("RawData.csv")
 
 # Creating new feature
@@ -6,6 +7,20 @@ df["Emission_Intensity"] = (
     df["Emission_Produced_tCO2"]/df["Energy_Demand_MWh"]
 )
 df = df.sort_values(["Company_ID", "Date"])
+
+# Data Normalization
+numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+numerical_cols = [col for col in numerical_cols ]
+
+# Apply z-score normalization (StandardScaler) to numerical features
+scaler = StandardScaler()
+df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+
+# Alternative: Use minimax normalization (uncomment to use instead)
+# scaler = MinMaxScaler()
+# df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+
+print(f"Normalized {len(numerical_cols)} numerical features: {numerical_cols}")
 
 # One hot encoding
 df = pd.get_dummies(
@@ -29,9 +44,5 @@ df["month"] = df["Date"].dt.month
 df["day"] = df["Date"].dt.day
 
 df.drop(columns=["Date"], inplace=True)
-#  making company ids more useful
-freq = df["Company_ID"].value_counts()
-df["company_freq"] = df["Company_ID"].map(freq)
-df.drop(columns=["Company_ID"], inplace=True)
 
-df.to_csv("Dataset\Features2.csv", index=False)
+df.to_csv("Features.csv", index=False)

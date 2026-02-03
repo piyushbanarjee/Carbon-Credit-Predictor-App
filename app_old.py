@@ -143,18 +143,9 @@ def load_model_if_exists(path):
     return None
 
 
-def emission_category(emission):
-    if emission <= 500:
-        return "Low Emission"
-    if emission <= 1000:
-        return "Moderate Emission"
-    if emission <= 2000:
-        return "High Emission"
-    return "Very High Emission"
-
-
 st.set_page_config(page_title="Carbon Credit Predictor", layout="centered")
 st.title("Carbon Credit Predictor")
+
 st.write("Enter inputs once and predict all models.")
 
 emission_model, emission_scaler = load_model_and_scaler(
@@ -169,6 +160,7 @@ rf_compliance = load_model_if_exists(RF_COMPLIANCE_PATH)
 rf_cost_savings = load_model_if_exists(RF_COST_SAVINGS_PATH)
 rf_optimization = load_model_if_exists(RF_OPTIMIZATION_PATH)
 
+# Input fields for the features
 st.subheader("Energy and Emission Parameters")
 energy_demand = st.number_input("Energy Demand (MWh)", 0.0, 10000.0, 1000.0)
 emission_allowance = st.number_input("Emission Allowance (tCO2)", 0.0, 10000.0, 500.0)
@@ -187,140 +179,47 @@ optimization_scenario = st.selectbox(
     "Scenario", ["Normal", "Low Demand", "Price Surge"]
 )
 
+def emission_category(emission):
+    if emission <= 500:
+        return "Low Emission"
+    elif emission <= 1000:
+        return "Moderate Emission"
+    elif emission <= 2000:
+        return "High Emission"
+    else:
+        return "Very High Emission"
+
 if st.button("Predict All Models"):
-    fuel_type_mixed, fuel_type_natural_gas, fuel_type_renewable = build_fuel_one_hot(
-        fuel_type
-    )
-    industry_type_energy, industry_type_manufacturing, industry_type_steel = (
-        build_industry_one_hot(industry_type)
-    )
-    optimization_low, optimization_surge = build_optimization_one_hot(
-        optimization_scenario
-    )
-
-    emission_input = np.array(
-        [
-            [
-                energy_demand,
-                emission_allowance,
-                carbon_price,
-                emission_intensity,
-                fuel_type_mixed,
-                fuel_type_natural_gas,
-                fuel_type_renewable,
-                industry_type_energy,
-                industry_type_manufacturing,
-                industry_type_steel,
-            ]
-        ]
-    )
-    emission_scaled = emission_scaler.transform(emission_input)
-    predicted_emission = emission_model.predict(emission_scaled)[0]
-
-    carbon_price_input = np.array(
-        [
-            [
-                energy_demand,
-                predicted_emission,
-                emission_allowance,
-                fuel_type_mixed,
-                fuel_type_natural_gas,
-                fuel_type_renewable,
-                industry_type_energy,
-                industry_type_manufacturing,
-                industry_type_steel,
-            ]
-        ]
-    )
-    carbon_price_scaled = carbon_price_scaler.transform(carbon_price_input)
-    predicted_carbon_price = carbon_price_model.predict(carbon_price_scaled)[0]
-
-    st.subheader("Predictions")
+    # Create one-hot encoded features
+    fuel_type_mixed = 1.0 if fuel_type == "Mixed Fuel" else 0.0
+    fuel_type_natural_gas = 1.0 if fuel_type == "Natural Gas" else 0.0
+    fuel_type_renewable = 1.0 if fuel_type == "Renewable" else 0.0
+    
+    industry_type_energy = 1.0 if industry_type == "Energy" else 0.0
+    industry_type_manufacturing = 1.0 if industry_type == "Manufacturing" else 0.0
+    industry_type_steel = 1.0 if industry_type == "Steel" else 0.0
+    
+    # Prepare input data
+    input_data = np.array([[
+        energy_demand,
+        emission_allowance,
+        carbon_price,
+        emission_intensity,
+        fuel_type_mixed,
+        fuel_type_natural_gas,
+        fuel_type_renewable,
+        industry_type_energy,
+        industry_type_manufacturing,
+        industry_type_steel
+    ]])
+    
+    # Scale the input
+    input_scaled = scaler.transform(input_data)
+    
+    # Make prediction
+    prediction = model.predict(input_scaled)
+    predicted_emission = prediction[0]
+    
     st.success(f"Predicted Carbon Emission: {predicted_emission:.2f} tCO2")
-    st.info(f"Emission Category: {emission_category(predicted_emission)}")
-    st.success(f"Predicted Carbon Price: {predicted_carbon_price:.2f} USD per t")
-
-    if rf_buysell is not None:
-        net_position = emission_allowance - predicted_emission
-        net_position_price_interaction = net_position * carbon_price
-        buysell_input = np.array(
-            [
-                [
-                    energy_demand,
-                    predicted_emission,
-                    emission_allowance,
-                    carbon_price,
-                    net_position,
-                    net_position_price_interaction,
-                    fuel_type_mixed,
-                    fuel_type_natural_gas,
-                    fuel_type_renewable,
-                ]
-            ]
-        )
-        buysell_pred = rf_buysell.predict(buysell_input)[0]
-        st.info(f"Transaction Type (class): {buysell_pred}")
-    else:
-        st.warning("Buy/Sell model not found.")
-
-    if rf_compliance is not None:
-        compliance_input = np.array(
-            [
-                [
-                    energy_demand,
-                    predicted_emission,
-                    carbon_price,
-                    industry_type_energy,
-                    industry_type_manufacturing,
-                    industry_type_steel,
-                ]
-            ]
-        )
-        compliance_pred = rf_compliance.predict(compliance_input)[0]
-        st.info(f"Compliance Cost (USD): {compliance_pred:.2f}")
-    else:
-        st.warning("Compliance Cost model not found.")
-
-    if rf_cost_savings is not None:
-        cost_savings_input = np.array(
-            [
-                [
-                    energy_demand,
-                    predicted_emission,
-                    optimization_low,
-                    optimization_surge,
-                    fuel_type_mixed,
-                    fuel_type_natural_gas,
-                    fuel_type_renewable,
-                ]
-            ]
-        )
-        cost_savings_pred = rf_cost_savings.predict(cost_savings_input)[0]
-        st.info(f"Carbon Cost Savings (USD): {cost_savings_pred:.2f}")
-    else:
-        st.warning("Cost Savings model not found.")
-
-    if rf_optimization is not None:
-        month_sin, month_cos = month_cyclical(month)
-        optimization_input = np.array(
-            [
-                [
-                    energy_demand,
-                    month_sin,
-                    month_cos,
-                    fuel_type_mixed,
-                    fuel_type_natural_gas,
-                    fuel_type_renewable,
-                    industry_type_energy,
-                    industry_type_manufacturing,
-                    industry_type_steel,
-                ]
-            ]
-        )
-        optimization_pred = rf_optimization.predict(optimization_input)[0]
-        optimization_labels = {0: "Normal", 1: "Low Demand", 2: "Price Surge"}
-        st.info(
-            f"Optimization Scenario (predicted): {optimization_labels.get(optimization_pred, optimization_pred)}"
-        )
-    else:
-        st.warning("Optimization Scenario model not found.")
+    category = emission_category(predicted_emission)
+    st.info(f"Emission Category: {category}")

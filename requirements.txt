@@ -5,6 +5,8 @@ numpy
 # Visualization, Analysis and report
 matplotlib
 seaborn
+plotly
+kaleido
 
 # Machine Learning
 scikit-learn

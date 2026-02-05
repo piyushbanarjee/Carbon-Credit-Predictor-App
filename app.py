@@ -554,7 +554,7 @@ with tab2:
     values = [predicted_emission, emission_allowance, np.absolute(predicted_carbon_price) * 10]
     bar_fig = create_bar_chart(categories, values, "Operational Metrics", "Metrics", "Value")
     st.plotly_chart(bar_fig, width="stretch")
-
+    
 # with tab3:
 #     st.markdown("### <i class='fas fa-money-bill-wave'></i> Financial Analysis", unsafe_allow_html=True)
     

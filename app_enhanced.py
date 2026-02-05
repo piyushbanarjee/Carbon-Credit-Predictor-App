@@ -663,7 +663,6 @@ with tab3:
                 <div class='metric-value'>${net_financial:.0f}</div>
             </div>
         """, unsafe_allow_html=True)
-
 st.markdown("""
     <div class='card' style='text-align: center; padding: 1.5rem; margin-top: 2rem;'>
         <p style='color: #667eea; font-weight: 600; margin: 0;'>
@@ -673,3 +672,4 @@ st.markdown("""
         </p>
     </div>
 """, unsafe_allow_html=True)
+

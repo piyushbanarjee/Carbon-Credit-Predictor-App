@@ -291,29 +291,7 @@ def apply_custom_css():
     """, unsafe_allow_html=True)
 
 
-def create_gauge_chart(value, title, max_value=100):
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
-        value=value,
-        title={'text': title, 'font': {'size': 20, 'color': '#667eea'}},
-        delta={'reference': max_value * 0.7},
-        gauge={
-            'axis': {'range': [None, max_value], 'tickcolor': '#667eea'},
-            'bar': {'color': "#667eea"},
-            'steps': [
-                {'range': [0, max_value * 0.33], 'color': "#e8f5e9"},
-                {'range': [max_value * 0.33, max_value * 0.66], 'color': "#fff9c4"},
-                {'range': [max_value * 0.66, max_value], 'color': "#ffebee"}
-            ],
-            'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': max_value * 0.9
-            }
-        }
-    ))
-    fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
-    return fig
+
 
 
 def create_pie_chart(values, labels, title):
